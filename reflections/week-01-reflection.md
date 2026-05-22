@@ -20,9 +20,9 @@ https://github.com/dgodinez227/media-tracker-android/pull/1/changes/073150096f7d
      Part 1 is the link — I will verify the review exists on GitHub.
      Part 2 is your written assessment — what you actually looked at and what you found. -->
 
-**Reviewed:** *(pod mate's name)*
+**Reviewed:** *(pod mate's name)* Mai
 **Link to my review:**
-https://github.com/dgodinez227/media-tracker-android/pull/1/changes/BASE..073150096f7dcf100813b8e9d59ee7bdbdd04240
+https://github.com/mmoua02/media-tracker-android/commit/676765b6cecae2856f822364d1d524dc4dc0fab5#r186162513
 ### What I Looked At
 
 <!-- Walk through the code you reviewed. What was the PR trying to do? Which files or
