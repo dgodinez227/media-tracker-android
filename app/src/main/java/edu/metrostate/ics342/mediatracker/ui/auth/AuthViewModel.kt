@@ -31,6 +31,7 @@ class AuthViewModel : ViewModel() {
     fun onEmailChange(value: String)    { _email.value    = value }
     fun onPasswordChange(value: String) { _password.value = value }
 
+
     fun onLoginClick() {
         viewModelScope.launch {
             _loginState.value = AuthUiState.Loading
