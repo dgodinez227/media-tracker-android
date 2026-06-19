@@ -13,6 +13,7 @@
     <string name="register_title">Create Account</string>
     <string name="register_tagline">Join the Community</string>
 
+
     <!-- Navigation -->
     <string name="nav_feed">Feed</string>
     <string name="nav_search">Search</string>
@@ -87,6 +88,12 @@
 
     <!-- Errors -->
     <string name="error_empty_credentials">Please enter your email and password.</string>
+    <string name="error_empty_fields">Please fill in all fields.</string>
+    <string name="error_passwords_mismatch">Passwords do not match.</string>
+    <string name="error_create_account_failed">Could not create account.</string>
+    <string name="error_network">Network error. Check your connection and try again.</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_email_or_username_taken">That email or username is already taken.</string>
 
     <!-- Media -->
     <string name="media_unknown_author">Unknown Author</string>

@@ -1,17 +1,27 @@
 package edu.metrostate.ics342.mediatracker.ui.auth
 
-import android.view.View
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import edu.metrostate.ics342.mediatracker.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import edu.metrostate.ics342.mediatracker.data.UserRepository
+import kotlinx.coroutines.launch
+import edu.metrostate.ics342.mediatracker.data.network.DefaultUserRepository
+import edu.metrostate.ics342.mediatracker.data.RegisterResult
 
 
 class RegisterViewModel : ViewModel() {
 
+    sealed class RegisterUiState(errorPasswordsMismatch: Int) {
+        object Idle    : RegisterUiState(R.string.error_passwords_mismatch)
+        object Loading : RegisterUiState(R.string.error_passwords_mismatch)
+        object Success : RegisterUiState(R.string.error_passwords_mismatch)
+        data class Error(val msgResId: Int) : RegisterUiState(R.string.error_passwords_mismatch)
+    }
     private val _displayName = MutableStateFlow(value = "")
+    private val userRepository: UserRepository = DefaultUserRepository()
     val displayName = _displayName.asStateFlow()
 
     private val _userName = MutableStateFlow("")
@@ -32,6 +42,7 @@ class RegisterViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage = _errorMessage.asStateFlow()
 
+    private val _registerState = MutableStateFlow<RegisterUiState>(RegisterUiState.Idle)
     fun setDisplayName(newValue: String) {
         _displayName.value = newValue
         _errorMessage.value = null
@@ -45,23 +56,36 @@ class RegisterViewModel : ViewModel() {
     fun onEmailChange(value: String)    { _email.value    = value }
     fun onPasswordChange(value: String) { _password.value = value }
 
-    fun onSignUpClick(): String {
-        return when { _displayName.value.isBlank() ->
-            "Please enter a display Name"
+    fun onRegisterClick(){
+        viewModelScope.launch {
+            _registerState.value = RegisterUiState.Loading
 
-            _userName.value.isBlank() ->
-                "Please enter a username"
-            _email.value.isBlank() ->
-                "Please enter an email"
-            _password.value.isBlank() ->
-                "Please enter a password"
-            _confirmPassword.value.isBlank() ->
-                "Please confirm your password"
-            _password.value != _confirmPassword.value ->
-                "Passwords dont match"
+            if (_displayName.value.isBlank() || _email.value.isBlank() ||
+                _userName.value.isBlank() || _password.value.isBlank() ||
+                _confirmPassword.value.isBlank()
+            ) {
+                _registerState.value = RegisterUiState.Error(R.string.error_empty_fields)
+                return@launch
+            }
 
-         else ->
-            "Sign Up screen not implemented yet"
+            if (_password.value != _confirmPassword.value) {
+                _registerState.value = RegisterUiState.Error(R.string.error_passwords_mismatch)
+                return@launch
+            }
+
+            val result = userRepository.register(
+                email       = _email.value,
+                password    = _password.value,
+                username    = _userName.value,
+                displayName = _displayName.value
+            )
+
+            _registerState.value = when (result) {
+                RegisterResult.Success      -> RegisterUiState.Success
+                RegisterResult.Conflict     -> RegisterUiState.Error(R.string.error_email_or_username_taken)
+                RegisterResult.NetworkError -> RegisterUiState.Error(R.string.error_network)
+                RegisterResult.UnknownError -> RegisterUiState.Error(R.string.error_generic)
+            }
         }
     }
 }

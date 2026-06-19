@@ -83,11 +83,6 @@ fun RegisterScreen(
     val scope = rememberCoroutineScope()
 
 
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(snackbarHostState)
-        }
-    ) { _ ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -226,10 +221,7 @@ fun RegisterScreen(
                 onClick = {
                     focusManager.clearFocus()
                     // viewModel.onLoginClick()
-                    val message = viewModel.onSignUpClick()
-                    scope.launch {
-                        snackbarHostState.showSnackbar(message)
-                    }
+                    val message = viewModel.onRegisterClick()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -264,4 +256,3 @@ fun RegisterScreen(
             }
         }
     }
-}
