@@ -13,9 +13,10 @@ data class Media(
     val network: String? = null,      // shows (streaming / broadcast platform)
     val coverUrl: String? = null,
     val publishedYear: Int? = null,
-    val averageRating: Float = 0f,
+    val averageRating: Float,
     val ratingCount: Int = 0,
-    val genres: List<String> = emptyList()
+    val genres: List<String> = emptyList(),
+    val description: String
 )
 
 /** Returns a human-readable credit line appropriate for the media type. */

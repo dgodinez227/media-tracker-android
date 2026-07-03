@@ -1,4 +1,5 @@
 package edu.metrostate.ics342.mediatracker.data.network
+import edu.metrostate.ics342.mediatracker.data.model.TokenRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Headers
@@ -8,4 +9,7 @@ import retrofit2.http.Query
 interface UserApiService {
     @POST("users")
     suspend fun createUser(@Body body: RegisterRequest): Response<Unit>
+
+    @POST("tokens")
+    suspend fun login(@Body request: TokenRequest): Response<AuthResponse>
 }

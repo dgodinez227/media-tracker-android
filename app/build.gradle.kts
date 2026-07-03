@@ -25,6 +25,9 @@ extensions.configure<ApplicationExtension> {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "API_CLIENT_ID", "\"${localProperties["apiClientId"]}\"")
+        buildConfigField("String", "API_CLIENT_SECRET", "\"${localProperties["apiClientSecret"]}\"")
+
     }
 
     buildTypes {
@@ -55,6 +58,8 @@ kotlin {
 
 
 dependencies {
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
