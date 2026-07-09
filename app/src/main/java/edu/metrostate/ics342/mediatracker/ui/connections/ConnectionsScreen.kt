@@ -1,10 +1,12 @@
 package edu.metrostate.ics342.mediatracker.ui.connections
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -119,6 +121,9 @@ private fun UserRow(
             OutlinedButton(
                 onClick  = { following = false },
                 modifier = Modifier.height(32.dp),
+                //rounded corner and border stroke
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
             ) { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.action_following), style = MaterialTheme.typography.labelMedium) }
         } else {

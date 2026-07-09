@@ -1,6 +1,7 @@
 package edu.metrostate.ics342.mediatracker.data
 
 import edu.metrostate.ics342.mediatracker.data.model.*
+import retrofit2.http.Query
 
 /**
  * Hardcoded fake data used throughout the app while real API integration is built out.
@@ -116,4 +117,14 @@ object FakeMediaRepository {
 
     val followers = listOf(userJordan, userPriya)
     val following = listOf(userMarco, userSarah)
+
+    fun search(
+        query: String,
+        type: String = "all"
+    ): List<Media> {
+        if (query.isBlank()) return mediaList
+
+        return mediaList
+    }
+
 }

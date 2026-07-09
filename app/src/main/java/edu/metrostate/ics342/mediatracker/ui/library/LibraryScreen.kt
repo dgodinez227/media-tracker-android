@@ -25,6 +25,12 @@ import coil.compose.AsyncImage
 import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
 import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
 import edu.metrostate.ics342.mediatracker.data.model.creatorCredit
+import edu.metrostate.ics342.mediatracker.theme.WantColor
+import edu.metrostate.ics342.mediatracker.theme.WantContainer
+import edu.metrostate.ics342.mediatracker.theme.ProgressColor
+import edu.metrostate.ics342.mediatracker.theme.ProgressContainer
+import edu.metrostate.ics342.mediatracker.theme.FinishedColor
+import edu.metrostate.ics342.mediatracker.theme.FinishedContainer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +65,14 @@ fun LibraryScreen(
                     FilterChip(
                         selected = selectedType == key,
                         onClick  = { selectedType = key },
+                        // rounded corners to 8.dp and added theme colors
+                        shape = RoundedCornerShape(8.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            labelColor = MaterialTheme.colorScheme.onSurface
+                        ),
                         label    = { Text(stringResource(labelRes)) }
                     )
                 }
@@ -142,6 +156,12 @@ private fun LibraryItemCard(
     var menuExpanded by remember { mutableStateOf(false) }
     var statusDialogVisible by remember { mutableStateOf(false) }
 
+    val (containerColor, labelColor) = when (item.status) {
+        LibraryStatus.WANT_TO -> WantContainer to WantColor
+        LibraryStatus.IN_PROGRESS -> ProgressContainer to ProgressColor
+        LibraryStatus.FINISHED -> FinishedContainer to FinishedColor
+    }
+
     if (statusDialogVisible) {
         AlertDialog(
             onDismissRequest = { statusDialogVisible = false },
@@ -166,7 +186,8 @@ private fun LibraryItemCard(
     Card(
         modifier  = Modifier.fillMaxWidth().clickable { onClick() },
         shape     = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        // card elevation to 2.dp
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -207,8 +228,11 @@ private fun LibraryItemCard(
                 Spacer(Modifier.height(6.dp))
                 SuggestionChip(
                     onClick = { statusDialogVisible = true },
+                    colors = SuggestionChipDefaults.suggestionChipColors(
+                        containerColor = containerColor
+                    ),
                     label   = { Text(stringResource(item.status.labelRes),
-                        style = MaterialTheme.typography.labelSmall) }
+                        style = MaterialTheme.typography.labelSmall, color = labelColor) }
                 )
             }
 
