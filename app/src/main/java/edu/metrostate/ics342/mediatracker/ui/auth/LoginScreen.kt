@@ -1,6 +1,7 @@
 package edu.metrostate.ics342.mediatracker.ui.auth
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -65,6 +66,11 @@ fun LoginScreen(
             onValueChange = viewModel::onEmailChange,
             label         = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.email_label)) },
             singleLine    = true,
+            //text using 8.dp rounded and focusBorder uses primary
+            shape = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary
+            ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
                 imeAction    = ImeAction.Next
@@ -82,6 +88,11 @@ fun LoginScreen(
             onValueChange = viewModel::onPasswordChange,
             label         = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.password_label)) },
             singleLine    = true,
+            //text using 8.dp rounded and focusBorder uses primary
+            shape = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary
+            ),
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
@@ -104,7 +115,9 @@ fun LoginScreen(
         Button(
             onClick  = { focusManager.clearFocus(); viewModel.onLoginClick() },
             enabled  = !isLoading,
-            modifier = Modifier.fillMaxWidth().height(48.dp)
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+            //rounded corners to 20.dp
+            shape = RoundedCornerShape(20.dp)
         ) {
             if (isLoading) {
                 CircularProgressIndicator(

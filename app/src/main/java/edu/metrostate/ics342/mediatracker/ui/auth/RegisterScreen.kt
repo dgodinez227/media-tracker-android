@@ -54,6 +54,7 @@ import edu.metrostate.ics342.mediatracker.theme.OnPrimaryContainer
 import edu.metrostate.ics342.mediatracker.theme.OnSurface
 import edu.metrostate.ics342.mediatracker.theme.PrimaryContainer
 import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -127,6 +128,12 @@ fun RegisterScreen(
                 onValueChange = viewModel::setDisplayName,
                 label = { Text("Display Name") },
                 singleLine = true,
+                //text using 8.dp rounded and focusBorder uses primary
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                ),
+
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next
@@ -143,6 +150,13 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = userName,
                 onValueChange = viewModel::onUserName,
+                singleLine = true,
+                //text using 8.dp rounded and focusBorder uses primary
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                ),
+
                 label = {
                     Text(
                         text = "Username",
@@ -162,6 +176,12 @@ fun RegisterScreen(
                 onValueChange = viewModel::onEmailChange,
                 label = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.email_label)) },
                 singleLine = true,
+                //text using 8.dp rounded and focusBorder uses primary
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                ),
+
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
@@ -179,6 +199,12 @@ fun RegisterScreen(
                 onValueChange = viewModel::onPasswordChange,
                 label = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.password_label)) },
                 singleLine = true,
+                //text using 8.dp rounded and focusBorder uses primary
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                ),
+
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -202,6 +228,11 @@ fun RegisterScreen(
                     )
                 },
                 singleLine = true,
+                //text using 8.dp rounded and focusBorder uses primary
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                ),
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -225,11 +256,13 @@ fun RegisterScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(48.dp),
+                //rounded corners to 20.dp
+                shape = RoundedCornerShape(20.dp)
             ) {
                 Text(
                     text = "Sign Up",
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.labelLarge
                 )
             }
 

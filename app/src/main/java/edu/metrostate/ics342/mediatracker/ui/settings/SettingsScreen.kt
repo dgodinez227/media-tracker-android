@@ -1,7 +1,9 @@
 package edu.metrostate.ics342.mediatracker.ui.settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -97,6 +99,9 @@ fun SettingsScreen(
                 OutlinedButton(
                     onClick  = { signOutDialogVisible = true },
                     modifier = Modifier.fillMaxWidth(),
+                    //rounded corner and border stroke
+                    shape = RoundedCornerShape(20.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                     colors   = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.error
                     )
