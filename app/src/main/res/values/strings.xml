@@ -105,5 +105,8 @@
     <string name="media_unknown_author">Unknown Author</string>
     <string name="media_unknown_director">Unknown Director</string>
     <string name="media_unknown_creator">Unknown Creator</string>
+    <string name="error_invalid_credentials">Invalid Credentials</string>
+    <string name="add_to_library">Add to Library</string>
+    <string name="edit_profile">Edit profile</string>
 
 </resources>
