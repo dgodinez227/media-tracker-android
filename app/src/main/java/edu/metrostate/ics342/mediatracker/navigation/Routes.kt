@@ -12,6 +12,7 @@ object Routes {
     const val MEDIA_DETAIL  = "media_detail/{mediaId}"
 
     const val SEARCH_RESULTS = "search_results?query={query}"
+
     const val WRITE_REVIEW  = "write_review/{mediaId}"
     const val USER_PROFILE  = "user_profile/{userId}"
     const val EDIT_PROFILE  = "edit_profile"
