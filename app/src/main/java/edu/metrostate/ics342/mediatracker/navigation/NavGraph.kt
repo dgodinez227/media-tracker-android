@@ -84,7 +84,12 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
 
             composable(Routes.SEARCH) {
                 SearchScreen(
-                    onMediaClick = { mediaId -> navController.navigate("media_detail/$mediaId") }
+                    onSearch = { query ->
+                        navController.navigate("search_results?query=${Uri.encode(query)}")
+                    },
+                    onMediaClick = { mediaId ->
+                        navController.navigate("media_detail/$mediaId")
+                    }
                 )
             }
 
