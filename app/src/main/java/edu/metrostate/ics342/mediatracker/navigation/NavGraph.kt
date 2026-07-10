@@ -106,7 +106,6 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
                     onWriteReview  = { mediaId -> navController.navigate("write_review/$mediaId") }
                 )
             }
-
             composable(
                 route     = Routes.WRITE_REVIEW,
                 arguments = listOf(navArgument("mediaId") { type = NavType.IntType })
