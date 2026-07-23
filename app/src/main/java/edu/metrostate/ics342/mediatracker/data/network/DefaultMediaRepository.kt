@@ -1,25 +1,77 @@
 package edu.metrostate.ics342.mediatracker.data.network
 
 import edu.metrostate.ics342.mediatracker.data.SessionRepository
+import edu.metrostate.ics342.mediatracker.data.model.ErrorResponse
+import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
+import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
+import edu.metrostate.ics342.mediatracker.data.model.Media
 import edu.metrostate.ics342.mediatracker.data.model.MediaDetail
+import edu.metrostate.ics342.mediatracker.data.model.MediaNotFoundException
+import edu.metrostate.ics342.mediatracker.data.model.Review
+import edu.metrostate.ics342.mediatracker.data.model.AddToLibraryRequest
+import retrofit2.Response
 
-class DefaultMediaRepository(
-    private val sessionRepository: SessionRepository
-) {
-    private val service: MediaApiService = RetrofitInstance.mediaApiService(sessionRepository)
+data class MediaPage(
+    val items: List<Media>,
+    val nextCursor: String?,
+    val hasMore: Boolean
+)
 
-    suspend fun getMediaById(mediaId: Int): MediaDetail? {
-        return try {
-            val response = service.getMediaById(mediaId)
-            if (response.isSuccessful) response.body() else null
-        } catch (e: Exception) {
-            null
+class DefaultMediaRepository(sessionRepository: SessionRepository) {
+
+    private val api = RetrofitInstance.mediaApiService(sessionRepository)
+
+    private fun parseErrorMessage(response: Response<*>): String? = try {
+        response.errorBody()?.string()?.let {
+            RetrofitInstance.json.decodeFromString<ErrorResponse>(it).message
         }
+    } catch (e: Exception) { null }
+
+    suspend fun search(query: String, type: String?, after: String?): MediaPage {
+        val response = api.searchMedia(
+            query = query.ifBlank { null },
+            type  = type?.ifBlank { null },
+            after = after
+        )
+        val items      = response.body() ?: emptyList()
+        val nextCursor = response.headers()["X-Next-Cursor"]
+        val hasMore    = response.headers()["X-Has-More"] == "true"
+        return MediaPage(items, nextCursor, hasMore)
     }
-}
-sealed interface MediaDetailResult {
-    data class Success(val media: MediaDetail) : MediaDetailResult
-    data object NotFound : MediaDetailResult
-    data object NetworkError : MediaDetailResult
-    data object UnknownError : MediaDetailResult
+
+    suspend fun getMediaDetail(id: Int): MediaDetail {
+        val response = api.getMediaDetail(id)
+        if (response.code() == 404) {
+            val message = parseErrorMessage(response) ?: "Media not found"
+            throw MediaNotFoundException(message)
+        }
+        if (!response.isSuccessful) {
+            val message = parseErrorMessage(response) ?: "Failed to load media (${response.code()})"
+            error(message)
+        }
+        return response.body() ?: error("Empty body for media detail $id")
+    }
+
+    /** Throws for other errors. HTTP 404 when null, item not in library */
+    suspend fun getLibraryItem(mediaId: Int): LibraryItem? {
+        val response = api.getLibraryItem(mediaId)
+        if (response.code() == 404) return null
+        if (!response.isSuccessful) error("Failed to load library item: ${response.code()}")
+        return response.body()
+    }
+
+    suspend fun addToLibrary(mediaId: Int, status: LibraryStatus): LibraryItem {
+        val response = api.addToLibrary(AddToLibraryRequest(mediaId, status.name.lowercase()))
+        if (!response.isSuccessful) {
+            val message = parseErrorMessage(response) ?: "Failed to add to library (${response.code()})"
+            error(message)
+        }
+        return response.body() ?: error("Empty body adding mediaId $mediaId to library")
+    }
+
+    suspend fun getReviews(mediaId: Int): List<Review> {
+        val response = api.getReviews(mediaId)
+        if (!response.isSuccessful) return emptyList()
+        return response.body() ?: emptyList()
+    }
 }

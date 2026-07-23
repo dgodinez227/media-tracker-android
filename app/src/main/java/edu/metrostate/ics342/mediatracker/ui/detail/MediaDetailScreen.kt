@@ -30,7 +30,7 @@ import edu.metrostate.ics342.mediatracker.data.model.MediaDetail
 /* fake test book
 private val fakeMedia = Media(
     id = 1,
-    mediaType = "book",
+    mediaType = MediaType.BOOK,
     title = "The Hitchhiker's Guide to the Galaxy",
     author = "Douglas Adams",
     publishedYear = 1979,
@@ -67,11 +67,11 @@ private val fakeMedia = Media(
 
     val uiState by viewModel.uiState.collectAsState()
     LaunchedEffect(mediaId) {
-        viewModel.loadMedia(mediaId)
+        viewModel.load(mediaId)
     }
 
     when (uiState) {
-        is MediaDetailViewModel.UiState.Loading -> {
+        is MediaDetailUiState.Loading -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -80,8 +80,8 @@ private val fakeMedia = Media(
             }
         }
 
-        is MediaDetailViewModel.UiState.Success -> {
-            val detail = (uiState as MediaDetailViewModel.UiState.Success).media
+        is MediaDetailUiState.Success -> {
+            val detail = (uiState as MediaDetailUiState.Success).detail
 
             Column {
                 TopAppBar(
@@ -204,17 +204,25 @@ private val fakeMedia = Media(
             }
         } // end success
 
-        is MediaDetailViewModel.UiState.Error -> {
+        is MediaDetailUiState.NotFound -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text((uiState as MediaDetailViewModel.UiState.Error).message)
+                Text("Media not found")
             }
         }
-    } // end ui
-}
 
+        is MediaDetailUiState.Error -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text((uiState as MediaDetailUiState.Error).message)
+            }
+        }
+    }
+}
 /*
     @Preview
     @Composable

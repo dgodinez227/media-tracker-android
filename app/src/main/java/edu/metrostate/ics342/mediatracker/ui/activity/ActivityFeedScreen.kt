@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import edu.metrostate.ics342.mediatracker.data.model.MediaType
 import edu.metrostate.ics342.mediatracker.data.model.ActivityEvent
 import edu.metrostate.ics342.mediatracker.data.model.descriptionText
 
@@ -152,10 +153,10 @@ private fun ActivityCard(
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(when (event.media?.mediaType) {
-                                "book"  -> "📖"
-                                "movie" -> "🎬"
-                                "show"  -> "📺"
-                                else    -> "?"
+                                MediaType.BOOK -> "Book"
+                                MediaType.MOVIE -> "Movie"
+                                MediaType.SHOW -> "Show"
+                                else -> "?"
                             }, style = MaterialTheme.typography.titleMedium)
                         }
                     }

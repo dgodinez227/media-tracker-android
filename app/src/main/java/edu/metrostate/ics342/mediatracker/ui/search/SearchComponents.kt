@@ -19,7 +19,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import edu.metrostate.ics342.mediatracker.R
 import edu.metrostate.ics342.mediatracker.data.model.Media
+import edu.metrostate.ics342.mediatracker.data.model.MediaType
 import edu.metrostate.ics342.mediatracker.data.model.creatorCredit
+import edu.metrostate.ics342.mediatracker.theme.MovieContainer
+import edu.metrostate.ics342.mediatracker.theme.OnMovieContainer
 
 @Composable
 fun MediaTypeFilterChips(
@@ -42,14 +45,6 @@ fun MediaTypeFilterChips(
             FilterChip(
                 selected = selectedType == type,
                 onClick = { onTypeSelect(type) },
-                // rounded corners to 8.dp and added theme colors
-                shape = RoundedCornerShape(8.dp),
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    labelColor = MaterialTheme.colorScheme.onSurface
-                ),
                 label = { Text(stringResource(labelRes)) }
             )
         }
@@ -67,24 +62,25 @@ fun MediaResultCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        // card elevation to 2.dp, rounded size to 12.dp
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             val containerColor = when (media.mediaType) {
-                "book" -> MaterialTheme.colorScheme.primaryContainer
-                "movie" -> MaterialTheme.colorScheme.primaryContainer
-                else -> MaterialTheme.colorScheme.secondaryContainer
+                MediaType.BOOK              -> MaterialTheme.colorScheme.primaryContainer
+                MediaType.MOVIE             -> MovieContainer
+                MediaType.SHOW, MediaType.UNKNOWN -> MaterialTheme.colorScheme.secondaryContainer
+                else -> MaterialTheme.colorScheme.onSurface
             }
             val iconTint = when (media.mediaType) {
-                "book" -> MaterialTheme.colorScheme.onPrimaryContainer
-                "movie" -> MaterialTheme.colorScheme.primaryContainer
-                else -> MaterialTheme.colorScheme.secondary
+                MediaType.BOOK              -> MaterialTheme.colorScheme.onPrimaryContainer
+                MediaType.MOVIE             -> OnMovieContainer
+                MediaType.SHOW, MediaType.UNKNOWN -> MaterialTheme.colorScheme.secondary
+                else -> MaterialTheme.colorScheme.onSurface
             }
 
             Box(
@@ -94,55 +90,46 @@ fun MediaResultCard(
                     .background(containerColor),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = when (media.mediaType) {
-                        "book" -> "Book"
-                        "movie" -> "Movie"
-                        "show" -> "Show"
-                        else -> "Media"
-                    }
-                )
-                /* Icon(
+                Icon(
                     painter = painterResource(when (media.mediaType) {
-                        "book"  -> "book"
-                        "movie" -> "movie"
-                        "else"    -> "else"
+                        MediaType.BOOK              -> R.drawable.menu_book_24px
+                        MediaType.MOVIE             -> R.drawable.movie_24px
+                        MediaType.SHOW, MediaType.UNKNOWN -> R.drawable.tv_24px
                     }),
                     contentDescription = null,
                     modifier = Modifier.size(32.dp),
                     tint = iconTint
                 )
             }
-*/
-                Spacer(Modifier.width(12.dp))
 
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = media.title,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        text = media.creatorCredit(LocalContext.current),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = buildString {
-                            append("★ ${"%.1f".format(media.averageRating)}")
-                            append(" · ${media.mediaType.replaceFirstChar { it.uppercase() }}")
-                            media.publishedYear?.let { append(" · $it") }
-                        },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
+            Spacer(Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = media.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = media.creatorCredit(LocalContext.current),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = buildString {
+                        append("★ ${"%.1f".format(media.averageRating)}")
+                        append(" · ${media.mediaType.displayName}")
+                        media.publishedYear?.let { append(" · $it") }
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.secondary
+                )
             }
         }
     }

@@ -3,7 +3,7 @@ package edu.metrostate.ics342.mediatracker.data.network
 import edu.metrostate.ics342.mediatracker.data.LoginResult
 import edu.metrostate.ics342.mediatracker.data.RegisterResult
 import edu.metrostate.ics342.mediatracker.data.UserRepository
-import edu.metrostate.ics342.mediatracker.data.model.TokenRequest
+import edu.metrostate.ics342.mediatracker.data.network.LoginRequest
 import java.io.IOException
 
 class DefaultUserRepository(
@@ -23,8 +23,8 @@ class DefaultUserRepository(
                     password = password,
                     username = username,
                     displayName = displayName,
-                    clientId = ApiConstants.CLIENT_ID,
-                    clientSecret = ApiConstants.CLIENT_SECRET
+                    clientId = "ics342-diego-godinez",
+                    clientSecret = "mt-bpDYQU9cfMWFuLq8Du"
                 )
             )
             when (response.code()) {
@@ -40,12 +40,12 @@ class DefaultUserRepository(
     override suspend fun login(email: String, password: String): LoginResult {
         return try {
             val response = service.login(
-                TokenRequest(
+                LoginRequest(
                     grantType = "password",
                     email = email,
                     password = password,
-                    clientId = ApiConstants.CLIENT_ID,
-                    clientSecret = ApiConstants.CLIENT_SECRET
+                    clientId = "ics342-diego-godinez",
+                    clientSecret = "mt-bpDYQU9cfMWFuLq8Du"
                 )
             )
             when (response.code()) {

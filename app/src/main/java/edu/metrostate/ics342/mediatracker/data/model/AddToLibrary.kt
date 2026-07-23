@@ -3,8 +3,7 @@ package edu.metrostate.ics342.mediatracker.data.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TokenResponse(
-    val accessToken: String,
-    val refreshToken: String,
-    val user: UserProfile
+data class AddToLibraryRequest(
+    val mediaId: Int,
+    val status: String
 )

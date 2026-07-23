@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import edu.metrostate.ics342.mediatracker.data.model.MediaType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,10 +150,15 @@ fun MyProfileScreen(
                             Surface(color = MaterialTheme.colorScheme.surfaceVariant,
                                 modifier = Modifier.fillMaxSize()) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Text(when (item.media.mediaType) {
-                                        "book" -> "📖"; "movie" -> "🎬"; "show" -> "📺"
-                                        else -> "?"
-                                    })
+                                    Text(
+                                        when (item.media.mediaType) {
+                                            MediaType.BOOK -> "📖"
+                                            MediaType.MOVIE -> "🎬"
+                                            MediaType.SHOW -> "📺"
+                                            else -> "?"
+                                        },
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
                                 }
                             }
                         }

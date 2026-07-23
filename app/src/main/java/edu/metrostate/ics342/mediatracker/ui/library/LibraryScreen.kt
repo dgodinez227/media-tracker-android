@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
 import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
+import edu.metrostate.ics342.mediatracker.data.model.MediaType
 import edu.metrostate.ics342.mediatracker.data.model.creatorCredit
 import edu.metrostate.ics342.mediatracker.theme.WantColor
 import edu.metrostate.ics342.mediatracker.theme.WantContainer
@@ -105,7 +106,7 @@ fun LibraryScreen(
 
         val filteredItems = items
             .filter { it.status == selectedStatus }
-            .filter { selectedType == "all" || it.media.mediaType == selectedType }
+            .filter { selectedType == "all" || it.media.mediaType.apiString == selectedType }
 
         if (filteredItems.isEmpty()) {
             Box(
@@ -207,10 +208,15 @@ private fun LibraryItemCard(
                     Surface(color = MaterialTheme.colorScheme.surfaceVariant,
                         modifier = Modifier.fillMaxSize()) {
                         Box(contentAlignment = Alignment.Center) {
-                            Text(when (item.media.mediaType) {
-                                "book" -> "📖"; "movie" -> "🎬"; "show" -> "📺"
-                                else -> "?"
-                            }, style = MaterialTheme.typography.titleLarge)
+                            Text(
+                                when (item.media.mediaType) {
+                                    MediaType.BOOK -> "📖"
+                                    MediaType.MOVIE -> "🎬"
+                                    MediaType.SHOW -> "📺"
+                                    else -> "?"
+                                },
+                                style = MaterialTheme.typography.titleMedium
+                            )
                         }
                     }
                 }

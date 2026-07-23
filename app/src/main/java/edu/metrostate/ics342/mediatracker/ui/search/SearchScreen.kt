@@ -3,6 +3,7 @@ package edu.metrostate.ics342.mediatracker.ui.search
 import android.app.appsearch.SearchResults
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -19,6 +20,7 @@ import edu.metrostate.ics342.mediatracker.R
 import edu.metrostate.ics342.mediatracker.data.FakeMediaRepository
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.material.icons.Icons
@@ -42,7 +44,7 @@ fun SearchScreen(
     val selectedType by viewModel.selectedType.collectAsState()
 
     val popularItems = FakeMediaRepository.mediaList.filter { media ->
-        selectedType.isEmpty() || media.mediaType == selectedType
+        selectedType.isEmpty() || media.mediaType.apiString == selectedType
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -61,50 +63,59 @@ fun SearchScreen(
             placeholder = { Text(stringResource(R.string.search_hint)) },
             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
             singleLine = true,
-            //text using 8.dp rounded and focusBorder uses primary
             shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary
             ),
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Search
-            ),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = {
                 if (query.isNotBlank()) {
                     val q = query
                     viewModel.clearQuery()
                     onSearch(q)
                 }
-                }
-            )
+            })
         )
 
         MediaTypeFilterChips(
             selectedType = selectedType,
             onTypeSelect = viewModel::onTypeSelect,
-            modifier = Modifier.padding(horizontal = 15.dp, vertical = 8.dp)
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(top = 8.dp)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 4.dp)
         ) {
-            Text(
-                text = stringResource(R.string.nav_search),
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            popularItems.forEach { media ->
-                MediaResultCard(
-                    media = media,
-                    onClick = { onMediaClick(media.id) }
+            item {
+                Text(
+                    text = stringResource(R.string.search_popular_this_week).uppercase(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
+            }
+            items(popularItems, key = { it.id }) { media ->
+                Card(
+                    onClick = { onMediaClick(media.id) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = media.title,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
             }
         }
     }
 }
-
-

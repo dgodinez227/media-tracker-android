@@ -3,6 +3,7 @@ package edu.metrostate.ics342.mediatracker.ui.search
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,12 +30,28 @@ fun SearchResultsScreen(
     var searchBarQuery by remember { mutableStateOf(initialQuery) }
     val results by viewModel.results.collectAsState()
     val selectedType by viewModel.selectedType.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+
+    val listState = rememberLazyListState()
+
+    // Trigger next page load when within 5 items of the end
+    val reachedBottom by remember {
+        derivedStateOf {
+            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+            val total = listState.layoutInfo.totalItemsCount
+            total > 0 && lastVisible >= total - 5
+        }
+    }
+    LaunchedEffect(reachedBottom) {
+        if (reachedBottom) viewModel.loadNextPage()
+    }
 
     LaunchedEffect(initialQuery) {
         viewModel.search(initialQuery)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -54,7 +71,6 @@ fun SearchResultsScreen(
                 placeholder = { Text(stringResource(R.string.search_hint)) },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 singleLine = true,
-                //text using 8.dp rounded and focusBorder uses primary
                 shape = RoundedCornerShape(8.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary
@@ -65,6 +81,7 @@ fun SearchResultsScreen(
                 })
             )
         }
+
 
         MediaTypeFilterChips(
             selectedType = selectedType,
@@ -80,8 +97,8 @@ fun SearchResultsScreen(
         )
 
         LazyColumn(
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(bottom = 16.dp)
+            state = listState,
+            modifier = Modifier.fillMaxSize()
         ) {
             items(results, key = { it.id }) { media ->
                 MediaResultCard(
@@ -89,7 +106,18 @@ fun SearchResultsScreen(
                     onClick = { onMediaClick(media.id) }
                 )
             }
+            if (isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
         }
     }
 }
-
