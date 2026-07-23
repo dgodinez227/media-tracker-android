@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.material3.*
 import androidx.compose.ui.graphics.Color
+import edu.metrostate.ics342.mediatracker.ui.detail.MediaDetailUiState
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -67,21 +68,18 @@ private val fakeMedia = Media(
 
     val uiState by viewModel.uiState.collectAsState()
     LaunchedEffect(mediaId) {
-        viewModel.loadMedia(mediaId)
+        viewModel.load(mediaId)
     }
 
     when (uiState) {
-        is MediaDetailViewModel.UiState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
+        is MediaDetailUiState.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         }
 
-        is MediaDetailViewModel.UiState.Success -> {
-            val detail = (uiState as MediaDetailViewModel.UiState.Success).media
+        is MediaDetailUiState.Success -> {
+            val detail = (uiState as MediaDetailUiState.Success).detail
 
             Column {
                 TopAppBar(
@@ -112,9 +110,8 @@ private val fakeMedia = Media(
                 ) {
                     Spacer(Modifier.height(24.dp))
 
-                    // AsyncImage Url is null, possible cause of app crash
                     AsyncImage(
-                        model = detail.coverUrl,
+                        model = detail.coverUrl ?: "",
                         contentDescription = "Cover",
                         modifier = Modifier
                             .size(200.dp)
@@ -122,7 +119,6 @@ private val fakeMedia = Media(
                     )
 
                     Spacer(Modifier.height(16.dp))
-
 
                     Text(
                         text = detail.author ?: detail.director ?: "Unknown",
@@ -172,7 +168,7 @@ private val fakeMedia = Media(
                         }
 
                         OutlinedButton(
-                            onClick = { /*save */ },
+                            onClick = { /* save */ },
                             modifier = Modifier.fillMaxWidth().weight(1f),
                             colors = ButtonDefaults.outlinedButtonColors(
                                 contentColor = MaterialTheme.colorScheme.primary
@@ -202,27 +198,18 @@ private val fakeMedia = Media(
                     )
                 }
             }
-        } // end success
+        }
 
-        is MediaDetailViewModel.UiState.Error -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text((uiState as MediaDetailViewModel.UiState.Error).message)
+        is MediaDetailUiState.NotFound -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Media not found")
             }
         }
-    } // end ui
-}
 
-/*
-    @Preview
-    @Composable
-    fun MediaDetailScreenPreview() {
-        MediaDetailScreen(
-            mediaId = 1,
-            onNavigateBack = {},
-            onWriteReview = {}
-        )
+        is MediaDetailUiState.Error -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text((uiState as MediaDetailUiState.Error).message)
+            }
+        }
     }
-*/
+}
