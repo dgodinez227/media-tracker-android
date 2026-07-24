@@ -1,5 +1,6 @@
 package edu.metrostate.ics342.mediatracker.data.network
 
+import edu.metrostate.ics342.mediatracker.data.model.AddToFavoritesRequest
 import edu.metrostate.ics342.mediatracker.data.model.AddToLibraryRequest
 import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
 import edu.metrostate.ics342.mediatracker.data.model.Media
@@ -28,4 +29,8 @@ interface MediaApiService {
 
     @GET("reviews")
     suspend fun getReviews(@Query("mediaId") mediaId: Int): Response<List<Review>>
+
+    @POST("favorites")
+    suspend fun addToFavorites(@Body body: AddToFavoritesRequest): Response< // ?// >
+
 }

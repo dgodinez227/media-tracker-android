@@ -36,7 +36,6 @@ class MediaDetailViewModel(application: Application) : AndroidViewModel(applicat
     private var currentMediaId: Int? = null
 
     fun load(mediaId: Int) {
-        Log.d("MediaDetail", "Loading media ID: $mediaId")
         currentMediaId = mediaId
         _uiState.value = MediaDetailUiState.Loading
         viewModelScope.launch {
@@ -54,6 +53,28 @@ class MediaDetailViewModel(application: Application) : AndroidViewModel(applicat
                 _uiState.value = MediaDetailUiState.NotFound
             } catch (e: Exception) {
                 _uiState.value = MediaDetailUiState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun addToLibrary(){
+        val mediaId = currentMediaId ?: return
+        viewModelScope.launch {
+            try {
+                repository.addToLibrary(mediaId, LibraryStatus.WANT_TO)
+            } catch (e: Exception){
+               //
+            }
+        }
+    }
+
+    fun addToFavorites() {
+        val mediaId = currentMediaId ?: return
+        viewModelScope.launch {
+            try {
+                repository.addToFavorties(mediaId)
+            } catch (e: Exception) {
+                //
             }
         }
     }

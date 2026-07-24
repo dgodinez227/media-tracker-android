@@ -44,7 +44,7 @@ object FakeMediaRepository {
             description = "null",
             genres = listOf("Fantasy", "Adventure")),
         Media(
-            id = 4,  mediaType = "book",  title = "Dune",
+            id = 4,  mediaType = "movie",  title = "Dune",
             author = "Frank Herbert", publishedYear = 1965,
             averageRating = 4.8f, ratingCount = 521,
             description = "null",

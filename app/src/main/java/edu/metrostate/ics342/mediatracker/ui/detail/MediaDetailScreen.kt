@@ -152,7 +152,7 @@ private val fakeMedia = Media(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         Button(
-                            onClick = { /* add library */ },
+                            onClick = { viewModel.addToLibrary },
                             modifier = Modifier.fillMaxWidth().weight(1f),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
@@ -168,7 +168,7 @@ private val fakeMedia = Media(
                         }
 
                         OutlinedButton(
-                            onClick = { /* save */ },
+                            onClick = { viewModel.addToFavorites },
                             modifier = Modifier.fillMaxWidth().weight(1f),
                             colors = ButtonDefaults.outlinedButtonColors(
                                 contentColor = MaterialTheme.colorScheme.primary
@@ -202,7 +202,7 @@ private val fakeMedia = Media(
 
         is MediaDetailUiState.NotFound -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Media not found")
+                Text("media not found")
             }
         }
 

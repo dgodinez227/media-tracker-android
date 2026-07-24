@@ -1,6 +1,7 @@
 package edu.metrostate.ics342.mediatracker.data.network
 
 import edu.metrostate.ics342.mediatracker.data.SessionRepository
+import edu.metrostate.ics342.mediatracker.data.model.AddToFavoritesRequest
 import edu.metrostate.ics342.mediatracker.data.model.AddToLibraryRequest
 import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
 import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
@@ -42,6 +43,11 @@ class DefaultMediaRepository(sessionRepository: SessionRepository) {
         return response.body() ?: error("Empty body")
     }
 
+    suspend fun getReviews(mediaId: Int): List<Review> {
+        val response = api.getReviews(mediaId)
+        if (!response.isSuccessful) return emptyList()
+        return response.body() ?: emptyList()
+    }
     suspend fun getLibraryItem(mediaId: Int): LibraryItem? {
         val response = api.getLibraryItem(mediaId)
         if (response.code() == 404) return null
@@ -54,10 +60,7 @@ class DefaultMediaRepository(sessionRepository: SessionRepository) {
         if (!response.isSuccessful) return null
         return response.body()
     }
-
-    suspend fun getReviews(mediaId: Int): List<Review> {
-        val response = api.getReviews(mediaId)
-        if (!response.isSuccessful) return emptyList()
-        return response.body() ?: emptyList()
-    }
+    suspend fun addToFavorties(mediaId: Int): // ? //
+        val response = api.addToFavorites(AddToFavoritesRequest(mediaId))
+        return
 }
