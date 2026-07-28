@@ -92,6 +92,29 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
                     }
                 )
             }
+            composable(
+                route = Routes.SEARCH_RESULTS,
+                arguments = listOf(
+                    navArgument("query") {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    }
+                )
+            ) { backStackEntry ->
+
+                val query =
+                    backStackEntry.arguments?.getString("query") ?: ""
+                SearchResultsScreen(
+                    initialQuery = query,
+
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onMediaClick = { mediaId ->
+                        navController.navigate("media_detail/$mediaId")
+                    }
+                )
+            }
 
             composable(Routes.LIBRARY) {
                 LibraryScreen(
@@ -99,11 +122,17 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
                 )
             }
 
-            composable(route = Routes.MEDIA_DETAIL) {
+            composable(
+                route = Routes.MEDIA_DETAIL,
+                arguments = listOf(navArgument("mediaId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val mediaId = backStackEntry.arguments?.getInt("mediaId") ?: return@composable
                 MediaDetailScreen(
-                    mediaId        = -1,
+                    mediaId = mediaId,
                     onNavigateBack = { navController.popBackStack() },
-                    onWriteReview  = { mediaId -> navController.navigate("write_review/$mediaId") }
+                    onWriteReview = { id ->
+                        navController.navigate("${Routes.WRITE_REVIEW}/$id")
+                    }
                 )
             }
             composable(

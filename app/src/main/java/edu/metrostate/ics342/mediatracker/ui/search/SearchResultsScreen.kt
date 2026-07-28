@@ -1,8 +1,10 @@
 package edu.metrostate.ics342.mediatracker.ui.search
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import edu.metrostate.ics342.mediatracker.ui.search.MediaResultCard
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.metrostate.ics342.mediatracker.R
 
@@ -28,7 +31,21 @@ fun SearchResultsScreen(
 ) {
     var searchBarQuery by remember { mutableStateOf(initialQuery) }
     val results by viewModel.results.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     val selectedType by viewModel.selectedType.collectAsState()
+
+    val listState = rememberLazyListState()
+
+    val reachedBottom by remember {
+        derivedStateOf {
+            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+            val total = listState.layoutInfo.totalItemsCount
+            total > 0 && lastVisible >= total - 5
+        }
+    }
+    LaunchedEffect(reachedBottom) {
+        if (reachedBottom) viewModel.loadNextPage()
+    }
 
     LaunchedEffect(initialQuery) {
         viewModel.search(initialQuery)
@@ -54,15 +71,16 @@ fun SearchResultsScreen(
                 placeholder = { Text(stringResource(R.string.search_hint)) },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 singleLine = true,
-                //text using 8.dp rounded and focusBorder uses primary
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary
-                ),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = {
-                    viewModel.search(searchBarQuery)
-                })
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        Log.d("SearchResScreen", "Keyboard search pressed: $searchBarQuery")
+
+                        if (searchBarQuery.isNotBlank()) {
+                            viewModel.search(searchBarQuery.trim())
+                        }
+                    }
+                )
             )
         }
 
@@ -80,16 +98,29 @@ fun SearchResultsScreen(
         )
 
         LazyColumn(
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(bottom = 16.dp)
+            state = listState,
+            modifier = Modifier.fillMaxSize()
         ) {
             items(results, key = { it.id }) { media ->
                 MediaResultCard(
                     media = media,
-                    onClick = { onMediaClick(media.id) }
+                    onClick = {
+                        onMediaClick(media.id)
+                    }
                 )
+            }
+            item {
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
             }
         }
     }
 }
-

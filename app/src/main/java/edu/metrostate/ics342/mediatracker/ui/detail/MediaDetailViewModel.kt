@@ -1,62 +1,120 @@
 package edu.metrostate.ics342.mediatracker.ui.detail
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.metrostate.ics342.mediatracker.data.datastore.DefaultSessionRepository
-import edu.metrostate.ics342.mediatracker.data.network.DefaultMediaRepository
-import edu.metrostate.ics342.mediatracker.data.network.MediaDetailResult
+import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
 import edu.metrostate.ics342.mediatracker.data.model.MediaDetail
+import edu.metrostate.ics342.mediatracker.data.model.MediaNotFoundException
+import edu.metrostate.ics342.mediatracker.data.model.Review
+import edu.metrostate.ics342.mediatracker.data.network.DefaultMediaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class MediaDetailViewModel(
-    application: Application,
-    private val repository: DefaultMediaRepository = DefaultMediaRepository(
-        DefaultSessionRepository(application.applicationContext)
-    )
-) : AndroidViewModel(application) {
-    // TODO (Week 7): Accept mediaId, call GET /media/{id}, expose MediaDetail state.
-    // Also call GET /library to load current status for this item.
-  /*  private val _mediaId = MutableStateFlow(-1)
-    val mediaId: StateFlow<Int> = _mediaId.asStateFlow()
+sealed interface MediaDetailUiState {
+    data object Loading : MediaDetailUiState
+    data object NotFound : MediaDetailUiState
+    data class Error(val message: String) : MediaDetailUiState
+    data class Success(
+        val detail: MediaDetail,
+        val libraryStatus: LibraryStatus?,
+        val reviews: List<Review>
+    ) : MediaDetailUiState
+}
 
-    fun setMediaId(id: Int) { _mediaId.value = id } */
-   // diff Ui states
-    sealed class UiState {
-        data object Loading : UiState()
-        data class Success(val media: MediaDetail) : UiState()
-        data class Error(val message: String) : UiState()
+class MediaDetailViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repository = DefaultMediaRepository(DefaultSessionRepository(application))
+
+    private val _uiState = MutableStateFlow<MediaDetailUiState>(MediaDetailUiState.Loading)
+    val uiState: StateFlow<MediaDetailUiState> = _uiState.asStateFlow()
+
+    private var currentMediaId: Int? = null
+
+    fun load(mediaId: Int) {
+        currentMediaId = mediaId
+        _uiState.value = MediaDetailUiState.Loading
+
+        viewModelScope.launch {
+            try {
+                // Uses the mediaId passed directly from the screen/navigation.
+                val detail = repository.getMediaDetail(mediaId)
+
+                val libraryItem = repository.getLibraryItem(mediaId)
+                val reviews = repository.getReviews(mediaId)
+
+                _uiState.value = MediaDetailUiState.Success(
+                    detail = detail,
+                    libraryStatus = libraryItem?.status,
+                    reviews = reviews
+                )
+
+            } catch (e: MediaNotFoundException) {
+                _uiState.value = MediaDetailUiState.NotFound
+
+            } catch (e: Exception) {
+                _uiState.value = MediaDetailUiState.Error(
+                    e.message ?: "unable to load media"
+                )
+            }
+        }
+    }
+    fun addToLibrary(){
+        val mediaId = currentMediaId ?: return
+        viewModelScope.launch {
+            try {
+                repository.addToLibrary(mediaId, LibraryStatus.WANT_TO)
+                load(mediaId)
+            } catch (e: Exception) {
+                _uiState.value = MediaDetailUiState.Error(
+                    e.message ?: "unable to add to library"
+                )
+            }
+        }
     }
 
-    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
-    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    fun updateLibraryStatus(status: LibraryStatus){
+        val mediaId = currentMediaId ?: return
 
-    fun loadMedia(mediaId: Int) {
         viewModelScope.launch {
-            _uiState.value = UiState.Loading
+            try {
+                repository.updateLibraryStatus(mediaId, status)
+                load(mediaId)
+            } catch (e: Exception) {
+                _uiState.value = MediaDetailUiState.Error(
+                    e.message ?: "unable to update status"
+                )
+            }
+        }
+    }
 
-            when (val result = repository.getMediaById(mediaId)) {
-                is MediaDetailResult.Success -> {
-                    _uiState.value = UiState.Success(result.media)
-                }
+    fun removeFromLibrary() {
+        val mediaId = currentMediaId ?: return
 
-                MediaDetailResult.NotFound -> {
-                    _uiState.value = UiState.Error("Not found")
-                }
-
-                MediaDetailResult.NetworkError -> {
-                    _uiState.value =
-                        UiState.Error("network erorr")
-                }
-
-                MediaDetailResult.UnknownError -> {
-                    _uiState.value =
-                        UiState.Error("unknown error")
-                }
+        viewModelScope.launch {
+            try {
+                repository.removeFromLibrary(mediaId)
+                load(mediaId)
+            } catch (e: Exception) {
+                _uiState.value = MediaDetailUiState.Error(
+                    e.message ?: "unable to remove media"
+                )
+            }
+        }
+    }
+    fun addToFavorites() {
+        val mediaId = currentMediaId ?: return
+        viewModelScope.launch {
+            try {
+                repository.addToFavorites(mediaId)
+            } catch (e: Exception) {
+                _uiState.value = MediaDetailUiState.Error(
+                    e.message ?: "unable to add to favorites"
+                )
             }
         }
     }

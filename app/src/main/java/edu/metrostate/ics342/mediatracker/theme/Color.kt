@@ -9,16 +9,20 @@ val PrimaryContainer   = Color(0xFFE0E0FF)
 val OnPrimaryContainer = Color(0xFF3730A3)
 
 // Secondary — warm amber
-val Secondary            = Color(0xFFDB2777)
+val Secondary            = Color(0xFFD97706)
 val OnSecondary          = Color(0xFFFFFFFF)
-val SecondaryContainer   = Color(0xFFFCE7F3)
-val OnSecondaryContainer = Color(0xFF831843)
+val SecondaryContainer   = Color(0xFFFEF3C7)
+val OnSecondaryContainer = Color(0xFF78350F)
 
 // Tertiary — teal
-val Tertiary            = Color(0xFFD97706)
+val Tertiary            = Color(0xFF0D9488)
 val OnTertiary          = Color(0xFFFFFFFF)
 val TertiaryContainer   = Color(0xFFCCFBF1)
 val OnTertiaryContainer = Color(0xFF134E4A)
+
+//Movie Accents
+val MovieContainer   = Color(0xFFFFE4EE)
+val OnMovieContainer = Color(0xFF9D174D)
 
 // added Want/Progress/Finsihed status color
 val WantColor = Color(0xFF7C3AED)

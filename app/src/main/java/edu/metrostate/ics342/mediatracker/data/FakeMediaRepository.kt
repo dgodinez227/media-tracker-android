@@ -44,7 +44,7 @@ object FakeMediaRepository {
             description = "null",
             genres = listOf("Fantasy", "Adventure")),
         Media(
-            id = 4,  mediaType = "book",  title = "Dune",
+            id = 4,  mediaType = "movie",  title = "Dune",
             author = "Frank Herbert", publishedYear = 1965,
             averageRating = 4.8f, ratingCount = 521,
             description = "null",
@@ -117,6 +117,24 @@ object FakeMediaRepository {
 
     val followers = listOf(userJordan, userPriya)
     val following = listOf(userMarco, userSarah)
+
+    val sampleMediaDetail = MediaDetail(
+        id            = 1080,
+        mediaType     = "movie",
+        title         = "Dune: Part Two",
+        director      = "Denis Villeneuve",
+        coverUrl      = "https://image.tmdb.org/t/p/w300/heM4XKC0jA8fTSNe8F7oUkcJV7Z.jpg",
+        publishedYear = 2024,
+        averageRating = 0.0f,
+        ratingCount   = 0,
+        genres        = listOf("Science Fiction", "Action"),
+        description   = "Paul Atreides unites with Chani and the Fremen while seeking " +
+                "revenge against the conspirators who destroyed his family. Facing a choice " +
+                "between the love of his life and the fate of the known universe, he endeavors " +
+                "to prevent a terrible future only he can foresee.",
+        runtimeMinutes = 166,
+        reviewCount    = 2
+    )
 
     fun search(
         query: String,
