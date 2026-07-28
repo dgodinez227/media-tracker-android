@@ -1,17 +1,26 @@
 package edu.metrostate.ics342.mediatracker.ui.library
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.metrostate.ics342.mediatracker.data.FakeMediaRepository
+import edu.metrostate.ics342.mediatracker.data.datastore.DefaultSessionRepository
 import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
 import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
-import kotlinx.coroutines.GlobalScope
+import edu.metrostate.ics342.mediatracker.data.network.DefaultMediaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class LibraryViewModel : ViewModel() {
+class LibraryViewModel(
+    application: Application
+) : AndroidViewModel(application) {
+
+    private val mediaRepository =
+        DefaultMediaRepository(
+            DefaultSessionRepository(application)
+        )
 
     private val _libraryItems = MutableStateFlow<List<LibraryItem>>(emptyList())
     val libraryItems: StateFlow<List<LibraryItem>> = _libraryItems.asStateFlow()
@@ -29,20 +38,53 @@ class LibraryViewModel : ViewModel() {
     fun loadLibrary() {
         viewModelScope.launch {
             _isLoading.value = true
-            _libraryItems.value = FakeMediaRepository.libraryItems
-            _isLoading.value = false
+
+            try {
+                val page = mediaRepository.getLibrary(
+                    status = null
+                )
+
+                _libraryItems.value = page.items
+            } catch (e: Exception) {
+                _libraryItems.value = emptyList()
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
     fun removeItem(mediaId: Int) {
-        _libraryItems.value = _libraryItems.value.filter { it.mediaId != mediaId }
+        viewModelScope.launch {
+            try {
+                val success = mediaRepository.removeFromLibrary(mediaId)
+
+                if (success) {
+                    loadLibrary()
+                }
+            } catch (e: Exception) {
+                //
+            }
+        }
     }
 
-    fun updateStatus(mediaId: Int, newStatus: LibraryStatus) {
-        _libraryItems.value = _libraryItems.value.map { item ->
-            if (item.mediaId == mediaId) item.copy(status = newStatus) else item
-        }
+    fun updateStatus(
+        mediaId: Int,
+        newStatus: LibraryStatus
+    ) {
+        viewModelScope.launch {
+            try {
+                val updated = mediaRepository.updateLibraryStatus(
+                    mediaId,
+                    newStatus
+                )
 
+                if (updated != null) {
+                    loadLibrary()
+                }
+            } catch (e: Exception) {
+                //
+            }
+        }
     }
 
     fun updateFilter(status: LibraryStatus) {

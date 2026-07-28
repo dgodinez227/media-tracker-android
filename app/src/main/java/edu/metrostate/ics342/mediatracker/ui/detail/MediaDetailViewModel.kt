@@ -38,9 +38,12 @@ class MediaDetailViewModel(application: Application) : AndroidViewModel(applicat
     fun load(mediaId: Int) {
         currentMediaId = mediaId
         _uiState.value = MediaDetailUiState.Loading
+
         viewModelScope.launch {
             try {
+                // Uses the mediaId passed directly from the screen/navigation.
                 val detail = repository.getMediaDetail(mediaId)
+
                 val libraryItem = repository.getLibraryItem(mediaId)
                 val reviews = repository.getReviews(mediaId)
 
@@ -49,32 +52,69 @@ class MediaDetailViewModel(application: Application) : AndroidViewModel(applicat
                     libraryStatus = libraryItem?.status,
                     reviews = reviews
                 )
+
             } catch (e: MediaNotFoundException) {
                 _uiState.value = MediaDetailUiState.NotFound
+
             } catch (e: Exception) {
-                _uiState.value = MediaDetailUiState.Error(e.message ?: "Unknown error")
+                _uiState.value = MediaDetailUiState.Error(
+                    e.message ?: "unable to load media"
+                )
             }
         }
     }
-
     fun addToLibrary(){
         val mediaId = currentMediaId ?: return
         viewModelScope.launch {
             try {
                 repository.addToLibrary(mediaId, LibraryStatus.WANT_TO)
-            } catch (e: Exception){
-               //
+                load(mediaId)
+            } catch (e: Exception) {
+                _uiState.value = MediaDetailUiState.Error(
+                    e.message ?: "unable to add to library"
+                )
             }
         }
     }
 
+    fun updateLibraryStatus(status: LibraryStatus){
+        val mediaId = currentMediaId ?: return
+
+        viewModelScope.launch {
+            try {
+                repository.updateLibraryStatus(mediaId, status)
+                load(mediaId)
+            } catch (e: Exception) {
+                _uiState.value = MediaDetailUiState.Error(
+                    e.message ?: "unable to update status"
+                )
+            }
+        }
+    }
+
+    fun removeFromLibrary() {
+        val mediaId = currentMediaId ?: return
+
+        viewModelScope.launch {
+            try {
+                repository.removeFromLibrary(mediaId)
+                load(mediaId)
+            } catch (e: Exception) {
+                _uiState.value = MediaDetailUiState.Error(
+                    e.message ?: "unable to remove media"
+                )
+            }
+        }
+    }
     fun addToFavorites() {
         val mediaId = currentMediaId ?: return
         viewModelScope.launch {
             try {
-                repository.addToFavorties(mediaId)
+                repository.addToFavorites(mediaId)
             } catch (e: Exception) {
-                //
+                _uiState.value = MediaDetailUiState.Error(
+                    e.message ?: "unable to add to favorites"
+                )
             }
         }
     }

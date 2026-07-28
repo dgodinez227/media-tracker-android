@@ -137,7 +137,7 @@ fun LibraryScreen(
             items(filteredItems, key = { it.mediaId }) { item ->
                 LibraryItemCard(
                     item           = item,
-                    onClick        = { onMediaClick(item.mediaId) },
+                    onClick = { onMediaClick(item.media.id) },
                     onRemove       = { viewModel.removeItem(item.mediaId) },
                     onStatusChange = { newStatus -> viewModel.updateStatus(item.mediaId, newStatus) }
                 )

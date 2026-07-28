@@ -1,13 +1,14 @@
 package edu.metrostate.ics342.mediatracker.data.model
+
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Review(
+data class Favorite(
     val userId: String,
     val mediaId: Int,
-    val rating: Int,
-    val reviewText: String? = null,
     val createdAt: String,
-    val user: UserProfile? = null,
+    // contextual for custom media type
+    @Contextual
     val media: Media? = null
 )
