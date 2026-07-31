@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import edu.metrostate.ics342.mediatracker.data.datastore.DefaultSessionRepository
 import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
 import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
+import edu.metrostate.ics342.mediatracker.data.model.Priority
 import edu.metrostate.ics342.mediatracker.data.network.DefaultMediaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,8 +32,16 @@ class LibraryViewModel(
     private val _filterState = MutableStateFlow(value = LibraryStatus.WANT_TO)
     val filterState: StateFlow<LibraryStatus> = _filterState.asStateFlow()
 
+    //priorities state
+    private val _priorities = MutableStateFlow<List<Priority>>(emptyList())
+    val priorities: StateFlow<List<Priority>> = _priorities.asStateFlow()
+
+    private val _prioritiesLoading = MutableStateFlow(false)
+    val prioritiesLoading: StateFlow<Boolean> = _prioritiesLoading.asStateFlow()
+
     init {
         loadLibrary()
+        loadPriorities()
     }
 
     fun loadLibrary() {
@@ -47,6 +56,20 @@ class LibraryViewModel(
                 _libraryItems.value = page.items
             } catch (e: Exception) {
                 _libraryItems.value = emptyList()
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun loadPriorities(){
+        viewModelScope.launch {
+            _prioritiesLoading.value = true
+
+            try{
+                _priorities.value = mediaRepository.getPriorities()
+            } catch (e: Exception){
+                _priorities.value = emptyList()
             } finally {
                 _isLoading.value = false
             }
@@ -89,5 +112,30 @@ class LibraryViewModel(
 
     fun updateFilter(status: LibraryStatus) {
         _filterState.value = status
+    }
+
+    fun updatePriority(
+        mediaId: Int,
+        priority: Int,
+        orderIndex: Int,
+        estimatedTimeHours: Int,
+        notes: String
+    ) {
+        viewModelScope.launch {
+            try {
+                val updated = mediaRepository.updatePriority(
+                    mediaId = mediaId,
+                    priority = priority,
+                    orderIndex = orderIndex,
+                    estimatedTimeHours = estimatedTimeHours,
+                    notes = notes
+                )
+                if (updated != null) {
+                    loadPriorities()
+                }
+            } catch (e: Exception) {
+                // error
+            }
+        }
     }
 }
