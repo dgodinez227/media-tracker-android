@@ -6,7 +6,9 @@ import edu.metrostate.ics342.mediatracker.data.model.Favorite
 import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
 import edu.metrostate.ics342.mediatracker.data.model.Media
 import edu.metrostate.ics342.mediatracker.data.model.MediaDetail
+import edu.metrostate.ics342.mediatracker.data.model.Priority
 import edu.metrostate.ics342.mediatracker.data.model.Review
+import edu.metrostate.ics342.mediatracker.data.model.UpdatePriorityRequest
 import retrofit2.Response
 import retrofit2.http.*
 interface MediaApiService {
@@ -56,4 +58,12 @@ interface MediaApiService {
     suspend fun removeFromFavorites(
         @Path("mediaId") mediaId: Int
     ): Response<Unit>
+
+    @GET("priorities")
+    suspend fun getPriorities(): Response<List<Priority>>
+
+    @PUT("priorities")
+    suspend fun updatePriority(
+        @Body body: UpdatePriorityRequest
+    ): Response<Priority>
 }

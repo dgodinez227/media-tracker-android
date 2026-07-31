@@ -10,7 +10,9 @@ import edu.metrostate.ics342.mediatracker.data.model.Favorite
 import edu.metrostate.ics342.mediatracker.data.network.UpdateLibraryStatusRequest
 import edu.metrostate.ics342.mediatracker.data.model.MediaDetail
 import edu.metrostate.ics342.mediatracker.data.model.MediaNotFoundException
+import edu.metrostate.ics342.mediatracker.data.model.Priority
 import edu.metrostate.ics342.mediatracker.data.model.Review
+import edu.metrostate.ics342.mediatracker.data.model.UpdatePriorityRequest
 
 data class MediaPage(
     val items: List<Media>,
@@ -124,6 +126,37 @@ class DefaultMediaRepository(sessionRepository: SessionRepository) {
     suspend fun updateLibraryStatus(mediaId: Int, status: LibraryStatus): LibraryItem? {
         val response = api.updateLibraryStatus(mediaId, UpdateLibraryStatusRequest(status))
         if (!response.isSuccessful) return null
+        return response.body()
+    }
+
+    suspend fun getPriorities(): List<Priority> {
+        val response = api.getPriorities()
+        if(!response.isSuccessful){
+            error("Failed to load priorities")
+        }
+        return response.body() ?: emptyList()
+    }
+
+    suspend fun updatePriority(
+        mediaId: Int,
+        priority: Int,
+        orderIndex: Int,
+        estimatedTimeHours: Int,
+        notes: String
+    ): Priority? {
+        val response = api.updatePriority(
+            UpdatePriorityRequest(
+            mediaId = mediaId,
+            priority = priority,
+            orderIndex = orderIndex,
+            estimatedTimeHours = estimatedTimeHours,
+            notes = notes
+            )
+        )
+        if (!response.isSuccessful) {
+            return null
+        }
+
         return response.body()
     }
 
