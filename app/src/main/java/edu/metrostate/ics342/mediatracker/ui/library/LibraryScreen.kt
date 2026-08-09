@@ -36,17 +36,40 @@ import edu.metrostate.ics342.mediatracker.theme.FinishedContainer
 @Composable
 fun LibraryScreen(
     onMediaClick: (Int) -> Unit,
+    onPrioritiesClick: () -> Unit,
     viewModel: LibraryViewModel = viewModel()
 ) {
     val items     by viewModel.libraryItems.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
+    val priorities by viewModel.priorities.collectAsState()
+    val prioritiesFull = priorities.size >= MAX_PRIORITIES
 
     val selectedStatus by viewModel.filterState.collectAsState()
     var selectedType by rememberSaveable { mutableStateOf("all") }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(title = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.library_title)) })
+
+        TopAppBar(
+            title = {
+                Text(
+                    text = stringResource(
+                        edu.metrostate.ics342.mediatracker.R.string.library_title
+                    )
+                )
+            },
+            actions = {
+                TextButton(
+                    onClick = onPrioritiesClick
+                ) {
+                    Text(
+                        text = stringResource(
+                            edu.metrostate.ics342.mediatracker.R.string.priority_title
+                        )
+                    )
+                }
+            }
+        )
 
         Row(
             modifier = Modifier
@@ -135,26 +158,45 @@ fun LibraryScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(filteredItems, key = { it.mediaId }) { item ->
+                val alreadyPrioritized =
+                    priorities.any {
+                        it.mediaId == item.mediaId
+                    }
                 LibraryItemCard(
                     item           = item,
                     onClick = { onMediaClick(item.media.id) },
                     onRemove       = { viewModel.removeItem(item.mediaId) },
-                    onStatusChange = { newStatus -> viewModel.updateStatus(item.mediaId, newStatus) }
+                    onStatusChange = { newStatus -> viewModel.updateStatus(item.mediaId, newStatus) },
+                    onSetPriority = { priority, estimatedHours, notes ->
+                        viewModel.addPriority(
+                            mediaId = item.mediaId,
+                            priority = priority,
+                            estimatedTimeHours = estimatedHours,
+                            notes = notes
+                        )
+                    },
+                    canSetPriority =
+                        !prioritiesFull || alreadyPrioritized
                 )
             }
         }
     }
 }
-
 @Composable
 private fun LibraryItemCard(
     item: LibraryItem,
     onClick: () -> Unit,
     onRemove: () -> Unit,
-    onStatusChange: (LibraryStatus) -> Unit
+    onSetPriority: (Int, Int, String) -> Unit,
+    onStatusChange: (LibraryStatus) -> Unit,
+    canSetPriority: Boolean
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var statusDialogVisible by remember { mutableStateOf(false) }
+    var priorityDialogVisible by remember { mutableStateOf(false) }
+    var selectedPriority by remember { mutableStateOf(1) }
+    var estimatedHoursText by remember { mutableStateOf("") }
+    var priorityNotes by remember { mutableStateOf("") }
 
     val (containerColor, labelColor) = when (item.status) {
         LibraryStatus.WANT_TO -> WantContainer to WantColor
@@ -179,6 +221,150 @@ private fun LibraryItemCard(
             confirmButton = {},
             dismissButton = {
                 TextButton(onClick = { statusDialogVisible = false }) { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_cancel_button)) }
+            }
+        )
+    }
+    if (priorityDialogVisible) {
+
+        val estimatedHours =
+            estimatedHoursText.toIntOrNull()
+
+        AlertDialog(
+            onDismissRequest = {
+                priorityDialogVisible = false
+            },
+
+            title = {
+                Text("Set Priority")
+            },
+
+            text = {
+                Column {
+
+                    Text(
+                        text = "Priority",
+                        style = MaterialTheme.typography.labelLarge
+                    )
+
+                    Spacer(
+                        Modifier.height(4.dp)
+                    )
+
+                    Row(
+                        horizontalArrangement =
+                            Arrangement.spacedBy(8.dp)
+                    ) {
+
+                        FilterChip(
+                            selected = selectedPriority == 1,
+                            onClick = {
+                                selectedPriority = 1
+                            },
+                            label = {
+                                Text("High")
+                            }
+                        )
+
+                        FilterChip(
+                            selected = selectedPriority == 2,
+                            onClick = {
+                                selectedPriority = 2
+                            },
+                            label = {
+                                Text("Medium")
+                            }
+                        )
+
+                        FilterChip(
+                            selected = selectedPriority == 3,
+                            onClick = {
+                                selectedPriority = 3
+                            },
+                            label = {
+                                Text("Low")
+                            }
+                        )
+                    }
+
+                    Spacer(
+                        Modifier.height(12.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = estimatedHoursText,
+                        onValueChange = { value ->
+                            if (value.all { it.isDigit() }) {
+                                estimatedHoursText = value
+                            }
+                        },
+                        label = {
+                            Text("Estimated Hours")
+                        },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(
+                        Modifier.height(12.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = priorityNotes,
+                        onValueChange = { value ->
+                            if (value.length <= 200) {
+                                priorityNotes = value
+                            }
+                        },
+                        label = {
+                            Text("Notes (optional)")
+                        },
+                        supportingText = {
+                            Text("${priorityNotes.length}/200")
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+
+            confirmButton = {
+                TextButton(
+                    enabled =
+                        estimatedHours != null &&
+                                estimatedHours >= 0,
+
+                    onClick = {
+                        if (estimatedHours != null) {
+                            onSetPriority(
+                                selectedPriority,
+                                estimatedHours,
+                                priorityNotes
+                            )
+
+                            priorityDialogVisible = false
+
+                            // Reset for next item
+                            selectedPriority = 1
+                            estimatedHoursText = ""
+                            priorityNotes = ""
+                        }
+                    }
+                ) {
+                    Text("Save")
+                }
+            },
+
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        priorityDialogVisible = false
+                    }
+                ) {
+                    Text(
+                        stringResource(
+                            edu.metrostate.ics342.mediatracker.R.string.settings_cancel_button
+                        )
+                    )
+                }
             }
         )
     }
@@ -248,6 +434,30 @@ private fun LibraryItemCard(
                         text    = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.action_change_status)) },
                         onClick = { menuExpanded = false; statusDialogVisible = true }
                     )
+
+                    if (
+                        item.status ==
+                        LibraryStatus.WANT_TO
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    if (canSetPriority) {
+                                        "Set Priority"
+                                    } else {
+                                        "Priorities Full (5/5)"
+                                    }
+                                )
+                            },
+                            enabled =
+                                canSetPriority,
+                            onClick = {
+                                menuExpanded = false
+                                priorityDialogVisible =
+                                    true
+                            }
+                        )
+                    }
                     DropdownMenuItem(
                         text    = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.action_remove_from_library),
                             color = MaterialTheme.colorScheme.error) },
