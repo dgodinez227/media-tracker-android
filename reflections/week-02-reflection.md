@@ -38,23 +38,19 @@ Well one specific bug I found was little buffer time when clicking off of the li
 
 ### Comments I Left
 
-<!-- Briefly summarize the comments you left on the PR. If you left a positive comment,
-     say what it was. If you left a suggestion, say what you suggested and why. --> Ryan solved the filters being set to default when the phone flipped, but it differed from the approach after. So I was curious whether it changes anything else.
+Ryan solved the filters being set to default when the phone flipped, but it differed from the approach after. So I was curious whether it changes anything else.
 
 ---
 
 ## One Thing I Understood More Deeply
 
-<!-- Be specific. Don't write "I learned about ViewModels." Write what specifically clicked —
-     what was confusing before, what made it make sense, and how you'd explain it to someone else.
-     There are no wrong answers here. --> This week its still more about using Android Studio and specifically understanding the find usage setting that helps see the path and where its being used and how. 
+This week its still more about using Android Studio and specifically understanding the find usage setting that helps see the path and where its being used and how. 
 
 ---
 
 ## One Thing I'm Still Confused About
 
-<!-- Be honest. This is the most useful part of the reflection for me — it tells me where to
-     spend more time in class. You will not lose points for being confused. --> I still just get a little mixed up on the pushing, and I'm never completely sure if my PR is in the right place. But I have found the terminal easier and much more straight forward than using Android Studio itself
+ I still just get a little mixed up on the pushing, and I'm never completely sure if my PR is in the right place. But I have found the terminal easier and much more straight forward than using Android Studio itself
 
 ---
 
