@@ -1,6 +1,7 @@
 package edu.metrostate.ics342.mediatracker.data
 
 import edu.metrostate.ics342.mediatracker.data.model.*
+import retrofit2.http.Query
 
 /**
  * Hardcoded fake data used throughout the app while real API integration is built out.
@@ -24,45 +25,65 @@ object FakeMediaRepository {
     )
 
     val mediaList = listOf(
-        Media(id = 1,  mediaType = "book",  title = "The Hitchhiker's Guide to the Galaxy",
+        Media(
+            id = 1,  mediaType = "book",  title = "The Hitchhiker's Guide to the Galaxy",
             author = "Douglas Adams", publishedYear = 1979,
             averageRating = 4.7f, ratingCount = 312,
+            description = "null",
             genres = listOf("Science Fiction", "Comedy")),
-        Media(id = 2,  mediaType = "book",  title = "Project Hail Mary",
+        Media(
+            id = 2,  mediaType = "book",  title = "Project Hail Mary",
             author = "Andy Weir", publishedYear = 2021,
             averageRating = 4.9f, ratingCount = 478,
+            description = "null",
             genres = listOf("Science Fiction", "Adventure")),
-        Media(id = 3,  mediaType = "book",  title = "The Name of the Wind",
+        Media(
+            id = 3,  mediaType = "book",  title = "The Name of the Wind",
             author = "Patrick Rothfuss", publishedYear = 2007,
             averageRating = 4.6f, ratingCount = 291,
+            description = "null",
             genres = listOf("Fantasy", "Adventure")),
-        Media(id = 4,  mediaType = "book",  title = "Dune",
+        Media(
+            id = 4,  mediaType = "movie",  title = "Dune",
             author = "Frank Herbert", publishedYear = 1965,
             averageRating = 4.8f, ratingCount = 521,
+            description = "null",
             genres = listOf("Science Fiction", "Epic")),
-        Media(id = 5,  mediaType = "movie", title = "Arrival",
+        Media(
+            id = 5,  mediaType = "movie", title = "Arrival",
             director = "Denis Villeneuve", publishedYear = 2016,
             averageRating = 4.5f, ratingCount = 263,
+            description = "null",
             genres = listOf("Science Fiction", "Drama")),
-        Media(id = 6,  mediaType = "movie", title = "Everything Everywhere All at Once",
+        Media(
+            id = 6,  mediaType = "movie", title = "Everything Everywhere All at Once",
             director = "Daniel Kwan, Daniel Scheinert", publishedYear = 2022,
             averageRating = 4.8f, ratingCount = 389,
+            description = "null",
             genres = listOf("Science Fiction", "Comedy", "Drama")),
-        Media(id = 7,  mediaType = "movie", title = "Interstellar",
+        Media(
+            id = 7,  mediaType = "movie", title = "Interstellar",
             director = "Christopher Nolan", publishedYear = 2014,
             averageRating = 4.6f, ratingCount = 441,
+            description = "null",
             genres = listOf("Science Fiction", "Adventure")),
-        Media(id = 8,  mediaType = "show",  title = "Severance",
+        Media(
+            id = 8,  mediaType = "show",  title = "Severance",
             creator = "Dan Erickson", network = "Apple TV+", publishedYear = 2022,
             averageRating = 4.9f, ratingCount = 317,
+            description = "null",
             genres = listOf("Thriller", "Science Fiction", "Drama")),
-        Media(id = 9,  mediaType = "show",  title = "The Bear",
+        Media(
+            id = 9,  mediaType = "show",  title = "The Bear",
             creator = "Christopher Storer", network = "FX on Hulu", publishedYear = 2022,
             averageRating = 4.8f, ratingCount = 298,
+            description = "null",
             genres = listOf("Drama", "Comedy")),
-        Media(id = 10, mediaType = "show",  title = "Andor",
+        Media(
+            id = 10, mediaType = "show",  title = "Andor",
             creator = "Tony Gilroy", network = "Disney+", publishedYear = 2022,
             averageRating = 4.7f, ratingCount = 276,
+            description = "null",
             genres = listOf("Science Fiction", "Drama", "Action")),
     )
 
@@ -96,4 +117,32 @@ object FakeMediaRepository {
 
     val followers = listOf(userJordan, userPriya)
     val following = listOf(userMarco, userSarah)
+
+    val sampleMediaDetail = MediaDetail(
+        id            = 1080,
+        mediaType     = "movie",
+        title         = "Dune: Part Two",
+        director      = "Denis Villeneuve",
+        coverUrl      = "https://image.tmdb.org/t/p/w300/heM4XKC0jA8fTSNe8F7oUkcJV7Z.jpg",
+        publishedYear = 2024,
+        averageRating = 0.0f,
+        ratingCount   = 0,
+        genres        = listOf("Science Fiction", "Action"),
+        description   = "Paul Atreides unites with Chani and the Fremen while seeking " +
+                "revenge against the conspirators who destroyed his family. Facing a choice " +
+                "between the love of his life and the fate of the known universe, he endeavors " +
+                "to prevent a terrible future only he can foresee.",
+        runtimeMinutes = 166,
+        reviewCount    = 2
+    )
+
+    fun search(
+        query: String,
+        type: String = "all"
+    ): List<Media> {
+        if (query.isBlank()) return mediaList
+
+        return mediaList
+    }
+
 }

@@ -1,5 +1,6 @@
 package edu.metrostate.ics342.mediatracker.ui.profile
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -113,7 +114,11 @@ fun MyProfileScreen(
 
             OutlinedButton(
                 onClick  = onEditProfile,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                //rounded corner and border stroke
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+
             ) { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.profile_edit_button)) }
 
             Spacer(Modifier.height(24.dp))
@@ -154,7 +159,7 @@ fun MyProfileScreen(
                         Spacer(Modifier.width(12.dp))
                         Column {
                             Text(item.media.title, style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium)
+                                fontWeight = FontWeight.SemiBold)
                             Text(stringResource(item.status.labelRes),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
