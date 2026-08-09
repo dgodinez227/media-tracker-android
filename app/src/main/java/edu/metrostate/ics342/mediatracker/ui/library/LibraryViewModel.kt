@@ -14,6 +14,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+internal const val MAX_PRIORITIES = 5
+
+internal fun canAddPriority(priorityCount: Int): Boolean {
+    return priorityCount < MAX_PRIORITIES
+}
+
+enum class PriorityError {
+    LOAD_FAILED,
+    UPDATE_FAILED,
+    MAX_REACHED
+}
 class LibraryViewModel(
     application: Application
 ) : AndroidViewModel(application) {
@@ -38,7 +49,11 @@ class LibraryViewModel(
 
     private val _prioritiesLoading = MutableStateFlow(false)
     val prioritiesLoading: StateFlow<Boolean> = _prioritiesLoading.asStateFlow()
+    private val _priorityError =
+        MutableStateFlow<PriorityError?>(null)
 
+    val priorityError: StateFlow<PriorityError?> =
+        _priorityError.asStateFlow()
     init {
         loadLibrary()
         loadPriorities()
@@ -62,16 +77,18 @@ class LibraryViewModel(
         }
     }
 
-    fun loadPriorities(){
+    fun loadPriorities() {
         viewModelScope.launch {
             _prioritiesLoading.value = true
-
-            try{
+            _priorityError.value = null
+            try {
                 _priorities.value = mediaRepository.getPriorities()
-            } catch (e: Exception){
+            } catch (e: Exception) {
                 _priorities.value = emptyList()
+                _priorityError.value =
+                    PriorityError.LOAD_FAILED
             } finally {
-                _isLoading.value = false
+                _prioritiesLoading.value = false
             }
         }
     }
@@ -121,6 +138,13 @@ class LibraryViewModel(
         estimatedTimeHours: Int,
         notes: String
     ) {
+
+        if (priority !in 1..3) {
+            _priorityError.value =
+                PriorityError.UPDATE_FAILED
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val updated = mediaRepository.updatePriority(
@@ -132,10 +156,138 @@ class LibraryViewModel(
                 )
                 if (updated != null) {
                     loadPriorities()
+                } else {
+                    _priorityError.value =
+                        PriorityError.UPDATE_FAILED
                 }
             } catch (e: Exception) {
-                // error
+                _priorityError.value =
+                    PriorityError.UPDATE_FAILED
             }
         }
+    }
+
+    fun addPriority(
+        mediaId: Int,
+        priority: Int,
+        estimatedTimeHours: Int,
+        notes: String
+    ) {
+        val currentPriorities = _priorities.value
+
+        val existingPriority =
+            currentPriorities.find {
+                it.mediaId == mediaId
+            }
+
+        if (existingPriority != null) {
+            updatePriority(
+                mediaId = existingPriority.mediaId,
+                priority = priority,
+                orderIndex = existingPriority.orderIndex,
+                estimatedTimeHours = estimatedTimeHours,
+                notes = notes
+            )
+            return
+        }
+
+        if (!canAddPriority(currentPriorities.size)) {
+            _priorityError.value = PriorityError.MAX_REACHED
+            return
+        }
+
+        val nextOrderIndex =
+            (currentPriorities.maxOfOrNull {
+                it.orderIndex
+            } ?: -1) + 1
+
+        updatePriority(
+            mediaId = mediaId,
+            priority = priority,
+            orderIndex = nextOrderIndex,
+            estimatedTimeHours = estimatedTimeHours,
+            notes = notes
+        )
+    }
+    fun reorderPriorities(
+        fromMediaId: Int,
+        toMediaId: Int
+    ) {
+
+        if (fromMediaId == toMediaId) return
+
+        val current =
+            _priorities.value
+                .sortedBy { it.orderIndex }
+                .toMutableList()
+
+        val fromIndex =
+            current.indexOfFirst {
+                it.mediaId == fromMediaId
+            }
+
+        val toIndex =
+            current.indexOfFirst {
+                it.mediaId == toMediaId
+            }
+
+        if (
+            fromIndex == -1 ||
+            toIndex == -1
+        ) {
+            return
+        }
+
+        val movedItem =
+            current.removeAt(fromIndex)
+
+        current.add(
+            toIndex,
+            movedItem
+        )
+
+        val reordered =
+            current.mapIndexed { index, item ->
+                item.copy(
+                    orderIndex = index
+                )
+            }
+        _priorities.value = reordered
+
+        viewModelScope.launch {
+            _priorityError.value = null
+
+            try {
+
+                reordered.forEach { item ->
+
+                    val updated =
+                        mediaRepository.updatePriority(
+                            mediaId = item.mediaId,
+                            priority = item.priority,
+                            orderIndex = item.orderIndex,
+                            estimatedTimeHours =
+                                item.estimatedTimeHours,
+                            notes = item.notes
+                        )
+
+                    if (updated == null) {
+                        throw IllegalStateException(
+                            "Priority reorder failed"
+                        )
+                    }
+                }
+                loadPriorities()
+
+            } catch (e: Exception) {
+
+                _priorityError.value =
+                    PriorityError.UPDATE_FAILED
+                loadPriorities()
+            }
+        }
+    }
+    fun clearPriorityError() {
+        _priorityError.value = null
     }
 }

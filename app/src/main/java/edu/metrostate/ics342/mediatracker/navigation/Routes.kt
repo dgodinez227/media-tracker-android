@@ -16,4 +16,6 @@ object Routes {
     const val WRITE_REVIEW  = "write_review/{mediaId}"
     const val USER_PROFILE  = "user_profile/{userId}"
     const val EDIT_PROFILE  = "edit_profile"
+
+    const val PRIORITIES = "priorities"
 }
